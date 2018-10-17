@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <TextView
+        android:id="@+id/paid_total_textView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:padding="1dp"
+        android:text="@string/enter_the_number_of_total_paid_leave"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="16sp" />
+
+    <SeekBar
+        android:id="@+id/paid_leave_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:max="70"
+        android:padding="2dp"
+        android:progress="0"
+        android:progressTint="@color/black"
+        android:thumbTint="@color/black" />
+
+    <TextView
+         android:id="@+id/sick_total_textView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:padding="1dp"
+        android:text="@string/enter_the_number_of_total_sick_leave"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="16sp" />
+
+    <SeekBar
+        android:id="@+id/sick_leave_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:max="70"
+        android:padding="2dp"
+        android:progress="0"
+        android:progressTint="@color/black"
+        android:thumbTint="@color/black" />
+
+</LinearLayout>
