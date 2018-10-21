@@ -20,18 +20,20 @@ import java.util.*
 class AddEditLeaveActivity : AppCompatActivity(), DatePickerDialog.OnDateSetListener, RadioGroup.OnCheckedChangeListener, SeekBar.OnSeekBarChangeListener {
 
 
-    var isForEdit: Boolean = false
+    private var isForEdit: Boolean = false
 
-    lateinit var leave: LeaveHistory
+    private lateinit var leave: LeaveHistory
 
-    lateinit var selectedDate: Date
+    private var selectedDate: Date = Date()
 
-    val leaveDB = LeavesDB(this, null, null, 1)
+    private val leaveDB = LeavesDB(this)
 
-    var totalRemainPaidLeaves = 0
-    var totalRemainSickLeaves = 0
+    private var totalRemainPaidLeaves = 0
+    private var totalRemainSickLeaves = 0
 
     private val pref = PreferenceHelper(this)
+
+    private var remainTotalLeaveForCurrentSelectedLeave = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,9 +41,9 @@ class AddEditLeaveActivity : AppCompatActivity(), DatePickerDialog.OnDateSetList
 
         isForEdit = intent.getBooleanExtra("isForEdit", false)
 
-        select_date_for_leave.setOnClickListener({
+        select_date_for_leave.setOnClickListener {
             showCalender()
-        })
+        }
 
         leave_selector_seekbar.setOnSeekBarChangeListener(this)
 
@@ -52,17 +54,24 @@ class AddEditLeaveActivity : AppCompatActivity(), DatePickerDialog.OnDateSetList
 
         if (isForEdit) {
             if (leave.leaveType == LeaveType.Paid) {
-                leave_selector_seekbar.max = totalRemainPaidLeaves
+                remainTotalLeaveForCurrentSelectedLeave = totalRemainPaidLeaves + leave.leaveCount
+                paid_radio_button.isChecked = true
             } else {
-                leave_selector_seekbar.max = totalRemainSickLeaves
+                remainTotalLeaveForCurrentSelectedLeave = totalRemainSickLeaves + leave.leaveCount
+                sick_radio_button.isChecked = true
             }
+            leave_type_radioGroup.isEnabled = false
+            leave_selector_seekbar.max = remainTotalLeaveForCurrentSelectedLeave
             leave_selector_seekbar.progress = leave.leaveCount
             leave_description_textView_id.text = leave.leaveDescription
             number_of_leave_textView.text = "Number of leaves: $leave.leaveCount"
             select_date_for_leave.text = Util.toStringFromDate(leave.leaveDate)
-
+            selectedDate = leave.leaveDate
         } else {
             leave_selector_seekbar.max = totalRemainPaidLeaves
+            leave_selector_seekbar.progress = 0
+            number_of_leave_textView.text = "Number of leaves: 0"
+
         }
 
     }
@@ -83,6 +92,10 @@ class AddEditLeaveActivity : AppCompatActivity(), DatePickerDialog.OnDateSetList
         } else {
             leave_selector_seekbar.max = totalRemainPaidLeaves
         }
+
+        if (leave_selector_seekbar.progress > leave_selector_seekbar.max){
+            number_of_leave_textView.text = "Number of leaves: $leave_selector_seekbar.max"
+        }
     }
 
     private fun showCalender() {
@@ -96,8 +109,8 @@ class AddEditLeaveActivity : AppCompatActivity(), DatePickerDialog.OnDateSetList
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
 
         menuInflater.inflate(R.menu.menu_leaves, menu)
-        if (menu != null)
-        menu.findItem(0).title = if (isForEdit) "Update" else "Save"
+//        if (menu != null)
+//        menu.findItem(0).title = if (isForEdit) "Update" else "Save"
         return super.onCreateOptionsMenu(menu)
 
     }
@@ -111,9 +124,8 @@ class AddEditLeaveActivity : AppCompatActivity(), DatePickerDialog.OnDateSetList
     private fun tappedOnSaveUpdate() {
 
         val leaveCount = leave_selector_seekbar.progress
-        val leaveDescription = leave_description_textView_id.text.toString()
+        val leaveDescription = text_description_view.text.toString()
         val leaveType: LeaveType = if (paid_radio_button.isChecked) LeaveType.Paid else LeaveType.Sick
-
         //Do Two task save or update
         if (isForEdit) {
 
@@ -121,6 +133,7 @@ class AddEditLeaveActivity : AppCompatActivity(), DatePickerDialog.OnDateSetList
             leave = LeaveHistory(leave.leaveID, leaveCount, selectedDate, leaveDescription, leaveType, leave.leaveCreatedDTM, current)
 
             leaveDB.updateLeave(leave)
+            updateTotalLeaves(leaveCount)
             Toast.makeText(this, "Updated current leave", Toast.LENGTH_LONG).show()
 
         } else {
@@ -129,6 +142,7 @@ class AddEditLeaveActivity : AppCompatActivity(), DatePickerDialog.OnDateSetList
             leave = LeaveHistory(-1, leaveCount, selectedDate, leaveDescription, leaveType, current, current)
 
             if (leaveDB.insertLeave(leave)) {
+                updateTotalLeaves(leaveCount)
                 Toast.makeText(this, "New leave added", Toast.LENGTH_LONG).show()
             } else {
                 Toast.makeText(this, "Sorry, Something went wrong", Toast.LENGTH_LONG).show()
@@ -136,6 +150,29 @@ class AddEditLeaveActivity : AppCompatActivity(), DatePickerDialog.OnDateSetList
 
         }
         finish()
+    }
+
+    private fun updateTotalLeaves(newLeaveCount:Int){
+
+        if (isForEdit){
+            val oldLeave = leave.leaveCount
+            val newLeaveCountBe = newLeaveCount - oldLeave
+
+            if (paid_radio_button.isChecked){
+                pref.setLeave(LeavesTags.PaidRemainLeave,totalRemainPaidLeaves-newLeaveCountBe)
+            }else {
+                pref.setLeave(LeavesTags.SickRemainLeave, totalRemainSickLeaves - newLeaveCountBe)
+            }
+        }else{
+            if (paid_radio_button.isChecked){
+                pref.setLeave(LeavesTags.PaidRemainLeave,totalRemainPaidLeaves-newLeaveCount)
+            }else {
+                pref.setLeave(LeavesTags.SickRemainLeave, totalRemainSickLeaves - newLeaveCount)
+            }
+        }
+
+
+
     }
 
     @SuppressLint("SimpleDateFormat")

@@ -24,7 +24,7 @@ class LeavesActivity : AppCompatActivity(), View.OnTouchListener {
 
     lateinit var adapter: LeavesAdapter
 
-    private var leaveDB: LeavesDB = LeavesDB(this, null, null, 1)
+    private var leaveDB: LeavesDB = LeavesDB(this)
 
     private val pref = PreferenceHelper(this)
 
@@ -37,10 +37,10 @@ class LeavesActivity : AppCompatActivity(), View.OnTouchListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_leaves)
 
-        leaveDB = LeavesDB(this, null, null, 1)
+        leaveDB = LeavesDB(this)
         setupRecycleView()
 
-        fab.setOnClickListener { view ->
+        fab.setOnClickListener { _ ->
             createNewLeave()
         }
 
@@ -150,7 +150,7 @@ class LeavesActivity : AppCompatActivity(), View.OnTouchListener {
 
         })
 
-        alertBuilder.setPositiveButton("Save", { _, _ ->
+        alertBuilder.setPositiveButton("Save") { _, _ ->
             pref.setLeave(LeavesTags.PaidLeave, paidSeekBar.progress)
             pref.setLeave(LeavesTags.SickLeave, sickSeekBar.progress)
 
@@ -161,12 +161,12 @@ class LeavesActivity : AppCompatActivity(), View.OnTouchListener {
 
             fetchTotalLeaves()
             setup()
-        })
+        }
 
-        alertBuilder.setNegativeButton("Cancel", { dialog, which ->
+        alertBuilder.setNegativeButton("Cancel") { _, _ ->
             fetchTotalLeaves()
             setup()
-        })
+        }
 
         val alertDialog = alertBuilder.create()
         alertDialog.show()

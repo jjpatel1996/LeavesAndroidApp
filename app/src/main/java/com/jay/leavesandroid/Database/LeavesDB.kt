@@ -2,22 +2,19 @@ package com.jay.leavesandroid.Database
 
 import android.content.ContentValues
 import android.content.Context
-import android.database.Cursor
 import android.database.SQLException
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import com.jay.leavesandroid.Classes.LeaveHistory
 import com.jay.leavesandroid.Classes.LeaveType
 import com.jay.leavesandroid.Classes.Util
-import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 //val Context.database: LeavesDB
 //    get() = LeavesDB.getInstance(applicationContext)
 
-class LeavesDB(context: Context, name: String?,
-                  factory: SQLiteDatabase.CursorFactory?, version: Int) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
+class LeavesDB(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
 
     companion object {
